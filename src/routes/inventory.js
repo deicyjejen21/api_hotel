@@ -8,10 +8,10 @@ import { InventoryCrll } from "../controllers/inventory.js";
 
 export const router = Router();
 
-// router.post(
-//   "/",
-//   validatorHandler(postProduct, "body"),
-//   wrapError(ProductCrll.create)
-// );
+router.post(
+    "/",
+    //   validatorHandler(postProduct, "body"),
+    wrapError(InventoryCrll.create)
+);
 
 router.get("/", wrapError(InventoryCrll.get));

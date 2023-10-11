@@ -9,9 +9,14 @@ import { ProductCrll } from "../controllers/products.js";
 export const router = Router();
 
 router.post(
-  "/",
-  validatorHandler(postProduct, "body"),
-  wrapError(ProductCrll.create)
+    "/",
+    validatorHandler(postProduct, "body"),
+    wrapError(ProductCrll.create)
+);
+router.put(
+    "/",
+    // validatorHandler(postProduct, "body"),
+    wrapError(ProductCrll.update)
 );
 
 router.get("/", wrapError(ProductCrll.get));

@@ -4,32 +4,29 @@ import { models } from "../libs/sequelize.js";
 
 export class InventoryCrll {
     static async create(req = request, res) {
-        const { reservationId } = req.body;
 
-        await models.Reservation.update({ state: "checkIn" }, {
-            where: {
-                id: reservationId,
-            },
+        const registerCreated = await models.Inventary.create(req.body, {
+            include: [{ model: models.Product, as: "product" }, { model: models.Room, as: "room" }],
         });
-
-        const registerCreated = await models.Register.create(req.body, {
-            include: [{ model: models.Reservation, as: "reservation" }],
-        });
-        console.log(
-            "🚀 ~ file: registers.js:19 ~ RegisterCrll ~ create ~ registerCreated:",
-            registerCreated
-        );
         resOk(res, { register: registerCreated });
     }
 
     static async get(req = request, res) {
-        let { page = 0, limit = 5 } = req.query;
+        let { page = 0, limit = 5, roomNumber } = req.query;
         page = Number(page);
         limit = Number(limit);
-        // resOk(res, { models: models, isnce: models.Inventory, prueba: "dw" });
-        const registersFound = await models.Inventary.findAll({
+
+        const options = {
             offset: page ? limit * page : 0,
             limit,
+        };
+
+        if (roomNumber) {
+            options.where = { roomNumber };
+        }
+        // resOk(res, { models: models, isnce: models.Inventory, prueba: "dw" });
+        const registersFound = await models.Inventary.findAll({
+            ...options,
             include: [{ model: models.Product, as: "product" }, { model: models.Room, as: "room" }],
             order: [
                 ["id", "DESC"]
