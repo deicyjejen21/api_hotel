@@ -4,60 +4,67 @@ const { PRODUCT_TABLE } = require("./product.model.cjs");
 
 const INVENTORY_TABLE = "inventory";
 const IventorySchema = {
-  id: {
-    allowNull: false,
-    autoIncrement: true,
-    primaryKey: true,
-    type: DataTypes.INTEGER,
-  },
-  productId: {
-    allowNull: false,
-    field: "product_id",
-    type: DataTypes.INTEGER,
-    references: {
-      model: PRODUCT_TABLE,
-      key: "id",
+    id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER,
     },
-    onUpdate: "CASCADE",
-    onDelete: "CASCADE",
-  },
-  roomNumber: {
-    allowNull: false,
-    field: "room_number",
-    type: DataTypes.INTEGER,
-    references: {
-      model: ROOM_TABLE,
-      key: "number",
+    productId: {
+        allowNull: false,
+        field: "product_id",
+        type: DataTypes.INTEGER,
+        references: {
+            model: PRODUCT_TABLE,
+            key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
     },
-    onUpdate: "CASCADE",
-    onDelete: "CASCADE",
-  },
-  amount: {
-    allowNull: false,
-    type: DataTypes.INTEGER,
-  },
-  createAt: {
-    allowNull: false,
-    type: DataTypes.DATE,
-    field: "create_at",
-    defaultValue: Sequelize.fn("now"),
-  },
+    roomNumber: {
+        allowNull: false,
+        field: "room_number",
+        type: DataTypes.INTEGER,
+        references: {
+            model: ROOM_TABLE,
+            key: "number",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+    },
+    amount: {
+        allowNull: false,
+        type: DataTypes.INTEGER,
+    },
+    createAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        field: "create_at",
+        defaultValue: Sequelize.fn("now"),
+    },
 };
 
 class Inventory extends Model {
-  static associate(models) {}
-  static config(sequelize) {
-    return {
-      sequelize,
-      tableName: INVENTORY_TABLE,
-      modelName: "Inventary",
-      timestamps: false,
-    };
-  }
+    static associate(models) {
+        this.belongsTo(models.Product, { as: "product" });
+        this.belongsTo(models.Room, { as: "room" });
+        // this.hasOne(models.Product, {
+        //     foreignKey: "productId",
+        //     as: "prod",
+        // });
+    }
+    static config(sequelize) {
+        return {
+            sequelize,
+            tableName: INVENTORY_TABLE,
+            modelName: "Inventary",
+            timestamps: false,
+        };
+    }
 }
 
 module.exports = {
-  INVENTORY_TABLE,
-  IventorySchema,
-  Inventory,
+    INVENTORY_TABLE,
+    IventorySchema,
+    Inventory,
 };
