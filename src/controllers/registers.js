@@ -1,6 +1,7 @@
 import { request } from "express";
 import { resOk } from "../utils/functions.js";
 import { models } from "../libs/sequelize.js";
+import { ClientError } from "../utils/errors.js";
 
 export class RegisterCrll {
   static async create(req = request, res) {
@@ -16,12 +17,9 @@ export class RegisterCrll {
     );
 
     const registerCreated = await models.Register.create(req.body, {
-      include: [{ model: models.Reservation, as: "reservation" }],
+      include: "reservation",
     });
-    console.log(
-      "🚀 ~ file: registers.js:19 ~ RegisterCrll ~ create ~ registerCreated:",
-      registerCreated
-    );
+
     resOk(res, { register: registerCreated });
   }
 
@@ -60,9 +58,14 @@ export class RegisterCrll {
         },
       ],
     });
-
     resOk(res, { register: registerFound });
   }
+
+  static async addPayment(req = request, res) {
+    const { id } = req.params;
+    resOk(res, { register: registerFound });
+  }
+
 
   static async update(res, req = request) {
     resOk(res, {});
@@ -70,6 +73,31 @@ export class RegisterCrll {
 
   static async addConsumable(req = request, res) {
     const { productId, registerId, amount } = req.body;
+
+    const register = await models.Register.findByPk(registerId, {
+      include: {
+        model: models.Reservation,
+        as: "reservation",
+        include: "room",
+      },
+    });
+
+    const roomNumber = register.reservation.room.number;
+    const inventory = await models.Inventary.findOne({
+      where: { productId, roomNumber },
+    });
+
+    if (!inventory)
+      throw new ClientError("Empty minibar in the room " + roomNumber);
+
+    if (inventory.amount < amount)
+      throw new ClientError("only available " + inventory.amount);
+
+    await models.Inventary.decrement(
+      { amount },
+      { where: { id: inventory.id } }
+    );
+
     const registerProduct = await models.RegisterProduct.findOne({
       where: { productId, registerId },
     });
@@ -79,7 +107,11 @@ export class RegisterCrll {
       const UpdatedRegisterProduct = await models.RegisterProduct.findByPk(
         registerProduct.id
       );
-      return resOk(res, { consumable: UpdatedRegisterProduct });
+
+      return resOk(res, {
+        consumable: UpdatedRegisterProduct,
+        amount_available: inventory.amount - amount,
+      });
     }
 
     const product = await models.Product.findByPk(Number(productId));

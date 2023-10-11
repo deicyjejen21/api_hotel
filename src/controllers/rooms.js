@@ -4,14 +4,17 @@ import { ClientError } from "../utils/errors.js";
 import { getRoomsAvailable } from "../utils/dbFunctions.js";
 import { models } from "../libs/sequelize.js";
 import { DATE, Op } from "sequelize";
+
 export class RoomCrll {
   static async create(req = request, res) {}
 
   static async getAvailable(req = request, res) {
     const { date_entry, date_output } = req.query;
+    
     if (!date_entry || !date_output) {
       throw new ClientError("debe filtrar por date_entry y date_output ");
     }
+
     const roomsAvaible = await models.Room.findAll({
       include: [
         {

@@ -47,7 +47,10 @@ const RegisterShema = {
         type: DataTypes.DATE,
         field: "updated_at",
     },
-
+    travel_reason: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     totalProducts: {
         type: DataTypes.FLOAT,
         get() {
@@ -87,7 +90,7 @@ const RegisterShema = {
     //   },
     // },
 
-    totalReservation: {
+    totalRoomReserved: {
         type: DataTypes.DECIMAL,
         get() {
             if (!this.reservation) return 0;
